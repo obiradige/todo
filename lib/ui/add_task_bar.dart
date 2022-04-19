@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:to_do_app/constants/themes.dart';
+import 'package:to_do_app/controllers/task_controller.dart';
+import 'package:to_do_app/models/task.dart';
 import 'package:to_do_app/widgets/buttons.dart';
 import 'package:to_do_app/widgets/input_field.dart';
 
@@ -13,6 +15,9 @@ class AddTaskBar extends StatefulWidget {
 }
 
 class _AddTaskBarState extends State<AddTaskBar> {
+  TaskController _taskController = Get.put(TaskController());
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _noteController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
   String _endTime = "9.30 PM";
   String _startTime = DateFormat("hh:mm a").format(DateTime.now()).toString();
@@ -36,8 +41,16 @@ class _AddTaskBarState extends State<AddTaskBar> {
                 "Add Task",
                 style: Themes().headingStyle,
               ),
-              MyInputFile(title: "Title", hint: "Enter your title"),
-              MyInputFile(title: "Note", hint: "Enter your note"),
+              MyInputFile(
+                title: "Title",
+                hint: "Enter your title",
+                controller: _titleController,
+              ),
+              MyInputFile(
+                title: "Note",
+                hint: "Enter your note",
+                controller: _noteController,
+              ),
               MyInputFile(
                 title: "Date",
                 hint: DateFormat.yMd().format(_selectedDate),
@@ -137,7 +150,7 @@ class _AddTaskBarState extends State<AddTaskBar> {
                   _colorPallete(),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: MyButton(label: "Create Task", onTap: null),
+                    child: MyButton(label: "Create Task", onTap: _validateDate),
                   )
                 ],
               )
@@ -147,45 +160,80 @@ class _AddTaskBarState extends State<AddTaskBar> {
       ),
     );
   }
-
-  _colorPallete(){
-    return     Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Color",
-                        style: Themes().titleStyle,
-                      ),
-                      SizedBox(
-                        height: 8,
-                      ),
-                      Wrap(
-                        children: List<Widget>.generate(3, (int index) {
-                          return GestureDetector(
-                            onTap: (){
-                              setState(() {
-                                _selectedColor = index;
-                              });
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.only(right: 8.0),
-                              child: CircleAvatar(
-                                radius: 14,
-                                backgroundColor: index == 0
-                                    ? Themes.primaryColor
-                                    : index == 1
-                                        ? Themes.pinkClr
-                                        : Themes.yellowClr,
-                                        child: _selectedColor == index?Icon(Icons.done,color: Colors.white,size: 16,):Container(),
-                              ),
-                              
-                            ),
-                          );
-                        }),
-                      )
-                    ],
-                  );
+  _validateDate() {
+    if (_titleController.text.isNotEmpty && _noteController.text.isNotEmpty) {
+      _addTaskToDb();
+      Get.back();
+    } else if (_titleController.text.isEmpty || _noteController.text.isEmpty) {
+      Get.snackbar("Required", "All fields are required",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.white,
+          colorText: Themes.pinkClr,
+          icon: Icon(
+            Icons.warning_amber_rounded,
+            color: Colors.red,
+          ));
+    }
   }
+  _addTaskToDb() async{
+   int? value = await _taskController.addTask(
+        task: Task(
+            note: _noteController.text,
+            title: _titleController.text,
+            date: DateFormat.yMd().format(_selectedDate),
+            startTime: _startTime,
+            endTime: _endTime,
+            remind: _selectedRemind,
+            repeat: _selectedRepeat,
+            color: _selectedColor,
+            isCompleted: 0));
+            print("my id is ${value}");
+  }
+
+  _colorPallete() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Color",
+          style: Themes().titleStyle,
+        ),
+        SizedBox(
+          height: 8,
+        ),
+        Wrap(
+          children: List<Widget>.generate(3, (int index) {
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedColor = index;
+                });
+              },
+              child: Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: CircleAvatar(
+                  radius: 14,
+                  backgroundColor: index == 0
+                      ? Themes.primaryColor
+                      : index == 1
+                          ? Themes.pinkClr
+                          : Themes.yellowClr,
+                  child: _selectedColor == index
+                      ? Icon(
+                          Icons.done,
+                          color: Colors.white,
+                          size: 16,
+                        )
+                      : Container(),
+                ),
+              ),
+            );
+          }),
+        )
+      ],
+    );
+  }
+
   _appBar(BuildContext context) {
     return AppBar(
       elevation: 0,
