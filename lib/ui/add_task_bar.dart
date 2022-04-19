@@ -160,6 +160,8 @@ class _AddTaskBarState extends State<AddTaskBar> {
       ),
     );
   }
+
+  
   _validateDate() {
     if (_titleController.text.isNotEmpty && _noteController.text.isNotEmpty) {
       _addTaskToDb();
@@ -175,6 +177,7 @@ class _AddTaskBarState extends State<AddTaskBar> {
           ));
     }
   }
+  
   _addTaskToDb() async{
    int? value = await _taskController.addTask(
         task: Task(

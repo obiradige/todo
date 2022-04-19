@@ -26,7 +26,23 @@ class Task {
     this.repeat 
   });
 
-  
+
+
+  factory Task.fromJson(Map<String, dynamic> json) {
+    return Task(
+      id: json['id']?.toInt(),
+      title: json['title'],
+      note: json['note'],
+      isCompleted: json['isCompleted']?.toInt(),
+      date: json['date'],
+      startTime: json['startTime'],
+      endTime: json['endTime'],
+      color: json['color']?.toInt(),
+      remind: json['remind']?.toInt(),
+      repeat: json['repeat'],
+      );
+    
+  }
 
   Map<String, dynamic> toJson() {
     final Map<String,dynamic> data = new Map<String,dynamic>();
@@ -44,20 +60,6 @@ class Task {
     return data;
   }
 
-  factory Task.fromMap(Map<String, dynamic> json) {
-    return Task(
-      id: json['id']?.toInt(),
-      title: json['title'],
-      note: json['note'],
-      isCompleted: json['isCompleted']?.toInt(),
-      date: json['date'],
-      startTime: json['startTime'],
-      endTime: json['endTime'],
-      color: json['color']?.toInt(),
-      remind: json['remind']?.toInt(),
-      repeat: json['repeat'],
-      
-    );
-    
-  }
+
+
 }
